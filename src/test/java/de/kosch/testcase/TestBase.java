@@ -1,15 +1,20 @@
 package de.kosch.testcase;
 
+import jp.vmi.selenium.selenese.Runner;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import de.kosch.annotations.SeleneseMethodInfo;
-import jp.vmi.selenium.selenese.Runner;
+import de.kosch.testcase.webresources.WebServer;
 
 @Test
 public class TestBase {
 
 
+    private WebServer server;
+
+    
     @SeleneseMethodInfo(driver ="HTMLUNIT", selenesePath = "TestLogin.html")
 	@Test(groups = "kundenverwaltung")
 	public void test1(Runner runner) {

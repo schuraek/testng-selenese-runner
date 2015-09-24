@@ -11,7 +11,9 @@ import de.kosch.runner.SeleneseRunnerBuilder;
 
 public class SeleneseDataProvider {
 
-	@DataProvider(name = Constants.SELENESE_DATAPROVIDER_NAME)
+    public static final String SELENESE_DATAPROVIDER_NAME = "selenese-test-dataprovider";
+
+	@DataProvider(name = SELENESE_DATAPROVIDER_NAME)
 	public static Object[][] resolveRunner(ITestContext testContext, Method method) {
 		SeleneseMethodInfo seleneseMethodInfo = method.getAnnotation(SeleneseMethodInfo.class);
 		String globalConfParameter = testContext.getCurrentXmlTest().getParameter(Constants.SELENESE_TEST_CONFIG_NAME);

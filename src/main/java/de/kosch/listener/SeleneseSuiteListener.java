@@ -50,7 +50,7 @@ public class SeleneseSuiteListener implements ISuiteListener, IAnnotationTransfo
             for (Parameter parameter : parameters) {
                 if (parameter.getType().equals(Runner.class)) {
                     annotation.setDataProviderClass(SeleneseDataProvider.class);
-                    annotation.setDataProvider(Constants.SELENESE_DATAPROVIDER_NAME);
+                    annotation.setDataProvider(SeleneseDataProvider.SELENESE_DATAPROVIDER_NAME);
                     break;
                 }
             }
