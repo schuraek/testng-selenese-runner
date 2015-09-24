@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="SeleneseTestsSuite" parallel="methods" thread-count="5"
+	verbose="1">
+	<listeners>
+		<listener class-name="de.kosch.listener.SeleneseSuiteListener" />
+	</listeners>
+	<test name="SeleneseTests">
+		<packages>
+			<package name="de.kosch.testcase" />
+		</packages>
+	</test>
+</suite>
