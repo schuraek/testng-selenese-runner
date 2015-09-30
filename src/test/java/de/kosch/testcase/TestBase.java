@@ -1,43 +1,31 @@
 package de.kosch.testcase;
 
-import jp.vmi.selenium.selenese.Runner;
-
-import org.testng.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import de.kosch.annotations.SeleneseMethodInfo;
+import de.kosch.listener.SeleneseMethodListener;
 import de.kosch.testcase.webresources.WebServer;
 
 @Test
 public class TestBase {
 
+    private static final Logger log = LoggerFactory.getLogger(SeleneseMethodListener.class);
 
     private WebServer server;
 
-    
-    @SeleneseMethodInfo(driver ="HTMLUNIT", selenesePath = "TestLogin.html")
-	@Test(groups = "kundenverwaltung")
-	public void test1(Runner runner) {
-        long threadId = Thread.currentThread().getId();
-        System.err.println("THREAD_ID 1TEST " +threadId);
-		Assert.assertEquals(true, true);
-	}
-
-    @SeleneseMethodInfo(selenesePath = "ArtikelLoeschen.html")
-    @Test(groups = "artikelverwaltung")
-    public void test2() {
-        long threadId = Thread.currentThread().getId();
-        System.err.println("THREAD_ID 2TEST " +threadId);
-        Assert.assertEquals(true, true);
+    @BeforeSuite
+    public void beforeSuite() {
+        server = new WebServer();
+        server.start();
+        log.info("Server started, base url is " + server.getBaseURL());
+        System.out.println("TEST");
     }
-    
-    
-    @SeleneseMethodInfo(driver ="FIREFOX", selenesePath = "TestLogin.html")
-	@Test(groups = "kundenverwaltung")
-	public void test3(Runner runner) {
-        long threadId = Thread.currentThread().getId();
-        System.err.println("THREAD_ID 3 TEST " +threadId);
-		Assert.assertEquals(true, true);
-	}
 
+    @AfterSuite
+    public void afterSuite() {
+        server.stop();
+    }
 }

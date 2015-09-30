@@ -13,11 +13,10 @@ public class SeleneseDataProvider {
 
     public static final String SELENESE_DATAPROVIDER_NAME = "selenese-test-dataprovider";
 
-	@DataProvider(name = SELENESE_DATAPROVIDER_NAME)
-	public static Object[][] resolveRunner(ITestContext testContext, Method method) {
-		SeleneseMethodInfo seleneseMethodInfo = method.getAnnotation(SeleneseMethodInfo.class);
-		String globalConfParameter = testContext.getCurrentXmlTest().getParameter(Constants.SELENESE_TEST_CONFIG_NAME);
-		return new Object[][] {
-				{ SeleneseRunnerBuilder.createRunnerIfNotExists(seleneseMethodInfo, globalConfParameter) } };
-	}
+    @DataProvider(name = SELENESE_DATAPROVIDER_NAME)
+    public static Object[][] resolveRunner(ITestContext testContext, Method method) {
+        SeleneseMethodInfo seleneseMethodInfo = method.getAnnotation(SeleneseMethodInfo.class);
+        String globalConfParameter = testContext.getCurrentXmlTest().getParameter(Constants.SELENESE_TEST_CONFIG_NAME);
+        return new Object[][] { { SeleneseRunnerBuilder.getThreadLocalRunner(seleneseMethodInfo, globalConfParameter) } };
+    }
 }

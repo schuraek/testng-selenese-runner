@@ -10,12 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -33,91 +33,89 @@ import com.google.common.io.Resources;
  */
 public class ResourceHandler {
 
-	private List<String> pathsList;
+    private List<String> pathsList;
 
-	private static final Logger log = LoggerFactory.getLogger(SeleneseFileHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(SeleneseFileHandler.class);
 
-	public ResourceHandler(String... paths) {
-		this.pathsList = new ArrayList<String>(Arrays.asList(paths));
-		this.pathsList.removeAll(Arrays.asList(null, StringUtils.EMPTY));
-	}
+    public ResourceHandler(String... paths) {
+        this.pathsList = new ArrayList<String>(Arrays.asList(paths));
+        this.pathsList.removeAll(Arrays.asList(null, StringUtils.EMPTY));
+    }
 
-	/**
-	 * join all files to one
-	 * 
-	 * @param target
-	 * @return
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 */
-	public File getJoinedFile(File target) throws IOException, URISyntaxException {
-		new IOCopier().joinFiles(target, getAllFiles());
-		return target;
-	}
+    /**
+     * join all files to one
+     * 
+     * @param target
+     * @return
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    public File getJoinedFile(File target) throws IOException, URISyntaxException {
+        new IOCopier().joinFiles(target, getAllFiles());
+        return target;
+    }
 
-	/**
-	 * return all founded files from paths
-	 * 
-	 * @return
-	 * @throws URISyntaxException
-	 */
-	public File[] getAllFiles() throws URISyntaxException {
-		Set<File> allFiles = new HashSet<File>();
-		for (String path : pathsList) {
-			File fileFromPath = FileUtils.getFile(path);
-			if (fileFromPath != null && fileFromPath.exists()) {
-				allFiles.add(fileFromPath);
-			} else {
-				try {
-					URL url = Resources.getResource(path);
-					fileFromPath = url != null ? new File(url.toURI()) : null;
-					if (fileFromPath != null) {
-						allFiles.add(fileFromPath);
-					}
-				} catch (Exception e) {
-					log.debug("ressource not found" + path);
-				}
+    /**
+     * return all founded files from paths
+     * 
+     * @return
+     * @throws URISyntaxException
+     */
+    public File[] getAllFiles() {
+        Set<File> collectFiles = pathsList.parallelStream().map(path -> findFile(path)).filter(file -> file != null)
+            .collect(Collectors.toSet());
+        return collectFiles.toArray(new File[collectFiles.size()]);
+    }
 
-			}
-		}
-		return allFiles.toArray(new File[allFiles.size()]);
-	}
+    protected List<String> getPathsList() {
+        return pathsList;
+    }
 
-	protected List<String> getPathsList() {
-		return pathsList;
-	}
+    /**
+     * joins files
+     * 
+     * @author Schuraev
+     *
+     */
+    protected class IOCopier {
+        public void joinFiles(File destination, File[] sources) throws IOException {
+            OutputStream output = null;
+            try {
+                output = createAppendableStream(destination);
+                for (File source : sources) {
+                    appendFile(output, source);
+                }
+            } finally {
+                IOUtils.closeQuietly(output);
+            }
+        }
 
-	/**
-	 * joins files
-	 * 
-	 * @author Schuraev
-	 *
-	 */
-	protected class IOCopier {
-		public void joinFiles(File destination, File[] sources) throws IOException {
-			OutputStream output = null;
-			try {
-				output = createAppendableStream(destination);
-				for (File source : sources) {
-					appendFile(output, source);
-				}
-			} finally {
-				IOUtils.closeQuietly(output);
-			}
-		}
+        private BufferedOutputStream createAppendableStream(File destination) throws FileNotFoundException {
+            return new BufferedOutputStream(new FileOutputStream(destination, true));
+        }
 
-		private BufferedOutputStream createAppendableStream(File destination) throws FileNotFoundException {
-			return new BufferedOutputStream(new FileOutputStream(destination, true));
-		}
+        private void appendFile(OutputStream output, File source) throws IOException {
+            InputStream input = null;
+            try {
+                input = new BufferedInputStream(new FileInputStream(source));
+                IOUtils.copy(input, output);
+            } finally {
+                IOUtils.closeQuietly(input);
+            }
+        }
+    }
 
-		private void appendFile(OutputStream output, File source) throws IOException {
-			InputStream input = null;
-			try {
-				input = new BufferedInputStream(new FileInputStream(source));
-				IOUtils.copy(input, output);
-			} finally {
-				IOUtils.closeQuietly(input);
-			}
-		}
-	}
+    protected File findFile(String path) {
+        File file = Paths.get(path).toFile();
+        if (!file.exists()) {
+            try {
+                file = FileUtils.toFile(Resources.getResource(path));
+            } catch (Exception e) {
+                log.debug("file with path: '" + path + "' not found");
+                return null;
+            }
+        }
+        return file;
+    }
+
 }
