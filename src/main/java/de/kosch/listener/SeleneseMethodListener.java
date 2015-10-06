@@ -50,11 +50,8 @@ public class SeleneseMethodListener implements IInvokedMethodListener {
         String[] selenesePathsFromMethod = seleneseMethodInfo.preconditionMode() ? seleneseMethodInfo.chainedParents()
             : seleneseMethodInfo.selenesePath();
         IConfig config = runnerContext.getConfig();
-        Set<String> composedSelenesePathsSet = Arrays.stream(testMethod.getGroups())
-            .map(element -> Paths.get(config.getOptionValue(Constants.SELENESE_TEST_DIR), element).toString())
-            .collect(Collectors.toSet());
-        String[] composedGroupPaths = composedSelenesePathsSet.toArray(new String[composedSelenesePathsSet.size()]);
-        String[] selenesePaths = resolveSelenesePaths(composedGroupPaths, selenesePathsFromMethod);
+        String[] selenesePaths = resolveSelenesePaths(config.getOptionValue(Constants.SELENESE_TEST_DIR),
+            testMethod.getGroups(), selenesePathsFromMethod);
         log.info("Start: " + testMethod.getMethodName());
         Runner runner = runnerContext.getRunner();
         Result result = runner.run(selenesePaths);
@@ -65,13 +62,14 @@ public class SeleneseMethodListener implements IInvokedMethodListener {
 
     /**
      * locates all seleneses depends groups and annotation
+     * @param seleneseDir 
      * 
      * @param groups
      * @param selenesePathsFromMethod
      * @return
      */
-    protected String[] resolveSelenesePaths(String[] groups, String[] selenesePathsFromMethod) {
-        SeleneseFileHandler seleneseFileHandler = new SeleneseFileHandler(groups, selenesePathsFromMethod);
+    protected String[] resolveSelenesePaths(String seleneseDir, String[] groups, String[] selenesePathsFromMethod) {
+        SeleneseFileHandler seleneseFileHandler = new SeleneseFileHandler(seleneseDir, groups, selenesePathsFromMethod);
         Set<String> absolutePathsSet = Arrays.stream(seleneseFileHandler.getAllFiles())
             .map(file -> file.getAbsolutePath()).collect(Collectors.toSet());
         if (absolutePathsSet.isEmpty())

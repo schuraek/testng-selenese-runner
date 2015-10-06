@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +16,11 @@ public class SeleneseFileHandler extends ResourceHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SeleneseFileHandler.class);
     private String[] groups;
+    private String seleneseDir;
 
-    public SeleneseFileHandler(String[] groups, String... paths) {
+    public SeleneseFileHandler(String seleneseDir, String[] groups, String... paths) {
         super(paths);
+        this.seleneseDir = seleneseDir;
         this.groups = groups != null ? groups : new String[0];
     }
 
@@ -36,12 +39,15 @@ public class SeleneseFileHandler extends ResourceHandler {
     protected File findFilesForGroup(String path) {
         File returnValue = null;
         try {
-            returnValue = Arrays.stream(groups).map(group -> findFile(Paths.get(group, path).toString()))
-                .filter(file -> file != null).findFirst().get();
+            Stream<File> flatMap = Arrays.stream(groups).parallel().flatMap(group -> Stream.of( //
+                findFile(Paths.get(seleneseDir, group, path).toString()),//
+                findFile(Paths.get(group, path).toString()),//
+                findFile(Paths.get(seleneseDir, path).toString())//
+                )).filter(file -> file != null);
+            returnValue = flatMap.findFirst().get();
         } catch (NoSuchElementException e) {
             log.debug("file with path: '" + path + "' not found");
         }
         return returnValue;
     }
-
 }

@@ -11,7 +11,7 @@ import de.kosch.testcase.TestBase;
 public class ConfigTest extends TestBase{
 
 
-    @SeleneseMethodInfo(driver ="HTMLUNIT", selenesePath = "FormsInput.html")
+    @SeleneseMethodInfo(driver ="FIREFOX", selenesePath = "FormsInput.html")
     @Test(groups = "config")
     public void testDriverOverrideDriverHTMLUnit(Runner runner) {
         long threadId = Thread.currentThread().getId();
