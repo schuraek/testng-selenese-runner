@@ -14,7 +14,7 @@ public class TestBase {
 
     private static final Logger log = LoggerFactory.getLogger(SeleneseMethodListener.class);
 
-    private WebServer server;
+    private static WebServer server;
 
     @BeforeSuite
     public void beforeSuite() {
